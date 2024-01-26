@@ -1,0 +1,162 @@
+#HISTORIAL DE COMANDOS:
+show history
+
+####################################
+	    INTERFACES (R/SW)
+####################################
+#ARP (R):
+show arp
+
+#TABLA MAC (SW):
+show mac-address-table
+
+#VER LAS RUTAS CONFIGURADAS:
+show runn | include route
+
+#TABLA DE RUTERO:
+show ip route
+
+#PROTOCOLOS DE RUTEO CONFIGURADOS:
+show ip protocols
+
+#RESUMEN:
+show ip interface brief
+
+#ESTADO, BW, DELAY, CONFIABILIDAD, ENCAPSULACION, DUPLEX DE UNA INTERFAZ:
+show interfaces
+
+#TODOS LOS DISPOS CISCO CONECTADOS:
+show cdp neighbors
+
+#VLANS EXISTENTES:
+show vlan
+
+#VLASN E INTERFACES ASIGNADAS A CADA UNA
+show vlan-membership
+
+####################################
+    LISTA DE CONTROL DE ACCESO (R)
+####################################
+#VER SI HAY ACLS:
+show access-list
+
+#DETALLES DE UNA ACL:
+show access-list https
+
+#VER EL MODO DE UNA ACL EN UNA INTERFAZ:
+show ip interface fa0/0
+
+####################################
+    	   ETHERCHANNEL (SW)
+####################################
+#RESUMEN:
+show etherchannel summary
+
+#REVISAR BALANCEO DE CARGAS:
+show etherchannel load
+
+#REVISAR SI ES MODO ACCESS O TRUNK:
+show interface gx/x switchport
+
+####################################
+	SAPANNING-TREE (SW)
+####################################
+#primero, info del root: 1rso dos valores son el BID, da los timmers
+#despues info del sw local 1rso dos valores son el BID, da los timmers
+show spanning-tree vlan 10
+show spanning-tree vlan 20
+
+#RESUMEN:
+show spanning-tree summary
+
+####################################
+	    HRSP (R)
+####################################
+#RESUMEN HRSP:
+show standby brief
+
+#RESUMEN VRRP:
+show vrrp brief
+
+####################################
+	    EIGRP (R)
+####################################
+#TOPOLOGIA EIGRP, SOLO S Y FS
+show ip eigrp topology
+
+#tOPOLOGIA EIGRP, MUESTRA TODOS:
+show ip eigrp topology all-links
+
+#RUTAS APRENDIDAS POR EIGRP:
+show ip route eigrp
+
+#CHECAR BW Y DLY DE CADA INTERFAZ:
+show interface fa0/0
+show interface fa0/1
+show interface loopback 0
+show interface loopback 1
+
+####################################
+	    OSPF (R)
+####################################
+#VECINOS DE OSPF:
+show ip ospf neighbor
+
+#CHECAR DATA BASE:
+show ip ospf database
+
+#CHECAR COSTOS DE LAS INTERFACES:
+show ip ospf interface brief
+#####################################################
+#R1 tiene una ip duplicada
+config t
+int fa0/0
+no ip add 1.1.12.2 255.255.255.252
+ip add 1.1.12.1 255.255.255.252
+
+#R2 area de loopback 9.9.9.9 esta mal
+config t
+router ospf 1
+no network 9.9.9.9 0.0.0.0 area 1
+network 9.9.9.9 0.0.0.0 area 0
+
+#R4 está como stub, debe ser nssa
+config t
+router ospf 1
+no area 2 stub
+area 2 nssa 
+
+#Poner de tipos stub summary R1 y R4 (NO LO PUSE)
+config t
+router eigrp 10
+no eigrp stub summary
+end
+
+#R4 poner rutas sumarizadas (era para el ultimo paso, mal aplicado, era hasta /22 no /21)
+config t
+router eigrp 10
+interface fa0/0
+ip summary-address eigrp 10 192.168.0.0 255.255.248.0
+end
+
+#ACL
+show access-list 101
+show ip interface fa0/0
+
+---Esto está mal
+configure terminal
+interface fastethernet0/1
+no ip access-group 101 in  
+
+---Este es el bueno
+ip accest-list extended 101
+5 permit ip any host 224.0.0.10
+
+#RUTA POR ABAJO: modoficar longest prefix match
+config t
+#sumarizar la de ospf hasta /21
+#O hacer las de eigrp en dos /22
+interface fa0/0
+no ip summary-address eigrp 10 192.168.0.0 255.255.248.0
+ip summary-address eigrp 10 192.168.0.0 255.255.252.0
+ip summary-address eigrp 10 192.168.0.4 255.255.252.0

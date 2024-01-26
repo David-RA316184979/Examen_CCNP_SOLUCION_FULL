@@ -1,0 +1,266 @@
+#####################################R1:
+config t
+hostname R1
+
+#ESTABLECER_DIRECCIONES:
+interface fa1/0
+ip address 1.1.2.1 255.255.255.252
+no shutdown
+exit
+
+interface fa2/0
+ip address 1.1.2.5 255.255.255.252
+no shutdown
+exit
+
+interface fa0/0
+ip address 1.1.13.1 255.255.255.252
+no shutdown
+exit
+
+interface fa0/1
+ip address 1.1.12.1 255.255.255.252
+no shutdown
+exit
+
+#LOOPBACK:
+interface loopback 0
+ip address 1.1.1.1 255.255.255.255
+no shutdown
+exit
+
+#RUTAS ESTATICAS:
+ip route 2.2.2.2 255.255.255.255 1.1.12.2
+ip route 3.3.3.3 255.255.255.255 1.1.13.2
+
+#OSPF:
+router ospf 1
+router-id 1.1.1.1
+network 1.1.2.0 0.0.0.3 area 0
+network 1.1.2.4 0.0.0.3 area 0
+#redistribute bgp 65001 subnets
+
+#BGP:
+router bgp 65001
+neighbor 2.2.2.2 remote-as 65002
+neighbor 2.2.2.2 update-source loopback 0
+neighbor 2.2.2.2 ebgp-multihop
+#neighbor 2.2.2.2 route-reflector-client
+neighbor 2.2.2.2 send-community
+neighbor 2.2.2.2 route-map RM1_VECINO2 in
+
+neighbor 3.3.3.3 remote-as 65003
+neighbor 3.3.3.3 update-source loopback 0
+neighbor 3.3.3.3 ebgp-multihop
+#neighbor 3.3.3.3 route-reflector-client
+neighbor 3.3.3.3 send-community
+neighbor 3.3.3.3 route-map RM1_VECINO3 in
+
+redistribute ospf 1 metric 100
+
+#ACL:
+ip access-list extended IMPAR
+permit ip 192.168.10.0 0.0.0.255 any
+permit ip 192.168.30.0 0.0.0.255 any
+
+ip access-list extended PAR
+permit ip 192.168.20.0 0.0.0.255 any
+permit ip 192.168.40.0 0.0.0.255 any
+
+#COMMUNITY-LIST:
+ip community-list 1 permit 100
+ip community-list 2 permit 200
+
+#ROUTE-MAPS:
+route-map RM1_VECINO2 permit 10
+match ip address IMPAR
+set community 100 additive
+set metric 200
+route-map RM1_VECINO2 permit 20
+match ip address PAR
+set community 200 additive
+set metric 100
+route-map RM1_VECINO2 permit 30
+
+route-map RM1_VECINO3 permit 10
+match ip address IMPAR
+set community 100 additive
+set metric 100
+route-map RM1_VECINO3 permit 20
+match ip address PAR
+set community 200 additive
+set metric 200
+route-map RM1_VECINO3 permit 30
+
+clear ip bgp *
+
+#####################################R2:
+config t
+hostname R2
+
+#ESTABLECER_DIRECCIONES:
+interface fa0/1
+ip address 1.1.12.2 255.255.255.252
+no shutdown
+exit
+
+interface fa0/0
+ip address 1.1.24.1 255.255.255.252
+no shutdown
+exit
+
+#LOOPBACK:
+interface loopback 0
+ip address 2.2.2.2 255.255.255.255
+no shutdown
+exit
+
+#RUTAS ESTATICAS:
+ip route 1.1.1.1 255.255.255.255 1.1.12.1
+ip route 4.4.4.4 255.255.255.255 1.1.24.2
+
+#BGP:
+router bgp 65002
+neighbor 1.1.1.1 remote-as 65001
+neighbor 1.1.1.1 update-source loopback 0
+neighbor 1.1.1.1 ebgp-multihop
+neighbor 1.1.1.1 send-community
+
+neighbor 4.4.4.4 remote-as 65004
+neighbor 4.4.4.4 update-source loopback 0
+neighbor 4.4.4.4 ebgp-multihop
+neighbor 4.4.4.4 send-community
+
+
+#####################################R3:
+config t
+hostname R3
+
+#ESTABLECER_DIRECCIONES:
+interface fa0/0
+ip address 1.1.13.2 255.255.255.252
+no shutdown
+exit
+
+interface fa0/1
+ip address 1.1.34.1 255.255.255.252
+no shutdown
+exit
+
+#LOOPBACK:
+interface loopback 0
+ip address 3.3.3.3 255.255.255.255
+no shutdown
+exit
+
+#RUTAS ESTATICAS:
+ip route 1.1.1.1 255.255.255.255 1.1.13.1
+ip route 4.4.4.4 255.255.255.255 1.1.34.2
+
+#BGP:
+router bgp 65003
+neighbor 1.1.1.1 remote-as 65001
+neighbor 1.1.1.1 update-source loopback 0
+neighbor 1.1.1.1 ebgp-multihop
+neighbor 1.1.1.1 send-community
+
+neighbor 4.4.4.4 remote-as 65004
+neighbor 4.4.4.4 update-source loopback 0
+neighbor 4.4.4.4 ebgp-multihop
+neighbor 4.4.4.4 send-community
+
+#####################################R4:
+config t
+hostname R4
+
+#ESTABLECER_DIRECCIONES:
+interface fa1/0
+ip address 1.1.3.1 255.255.255.252
+no shutdown
+exit
+
+interface fa2/0
+ip address 1.1.3.5 255.255.255.252
+no shutdown
+exit
+
+interface fa0/0
+ip address 1.1.24.2 255.255.255.252
+no shutdown
+exit
+
+interface fa0/1
+ip address 1.1.34.2 255.255.255.252
+no shutdown
+exit
+
+#LOOPBACK:
+interface loopback 0
+ip address 4.4.4.4 255.255.255.255
+no shutdown
+exit
+
+#RUTAS ESTATICAS:
+ip route 2.2.2.2 255.255.255.255 1.1.24.1
+ip route 3.3.3.3 255.255.255.255 1.1.34.1
+
+#EIGRP:
+router eigrp 10
+no auto
+network 1.1.3.0 0.0.0.3
+network 1.1.3.4 0.0.0.3
+#redistribute bgp 65004 metric 1000 100 1 1 1500
+
+#BGP:
+router bgp 65004
+neighbor 2.2.2.2 remote-as 65002
+neighbor 2.2.2.2 update-source loopback 0
+neighbor 2.2.2.2 ebgp-multihop
+#neighbor 2.2.2.2 route-reflector-client
+neighbor 2.2.2.2 send-community
+neighbor 2.2.2.2 route-map RM4_VECINO2 in
+
+neighbor 3.3.3.3 remote-as 65003
+neighbor 3.3.3.3 update-source loopback 0
+neighbor 3.3.3.3 ebgp-multihop
+#neighbor 3.3.3.3 route-reflector-client
+neighbor 3.3.3.3 send-community
+neighbor 3.3.3.3 route-map RM4_VECINO3 in
+
+redistribute eigrp 10 metric 1000
+
+#ACL:
+ip access-list extended IMPAR
+permit ip 192.168.10.0 0.0.0.255 any
+permit ip 192.168.30.0 0.0.0.255 any
+
+ip access-list extended PAR
+permit ip 192.168.20.0 0.0.0.255 any
+permit ip 192.168.40.0 0.0.0.255 any
+
+#COMMUNITY-LIST:
+ip community-list 1 permit 100
+ip community-list 2 permit 200
+
+#ROUTE-MAPS:
+route-map RM4_VECINO2 permit 10
+match ip address IMPAR
+set community 100 additive
+set metric 200
+route-map RM4_VECINO2 permit 20
+match ip address PAR
+set community 200 additive
+set metric 100
+route-map RM4_VECINO2 permit 30
+
+route-map RM4_VECINO3 permit 10
+match ip address IMPAR
+set community 100 additive
+set metric 100
+route-map RM4_VECINO3 permit 20
+match ip address PAR
+set community 200 additive
+set metric 200
+route-map RM4_VECINO3 permit 30
+
+clear ip bgp *

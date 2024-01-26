@@ -1,0 +1,132 @@
+#################################SW1:
+configure terminal
+hostame SW1
+
+#VLANS:
+vlan 10
+vlan 20
+
+#INTERFACES:
+interface range ethernet1-2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk allowed vlan 10,20
+exit
+
+interface e3
+switchport mode access
+switchport access vlan 10
+exit
+
+interface e4
+switchport mode access
+switchport access vlan 20
+exit
+
+#STP:
+spanning-tree mode rapid-pvst
+interface range e3-4
+spanning-tree portfast
+spanning-tree bpduguard enable
+#spanning-tree bpdufilter enable
+exit
+
+
+#################################SW2:
+configure terminal
+hostame SW2
+
+#VLANS:
+vlan 10
+vlan 20
+
+#INTERFACES:
+interface range ethernet1-2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk allowed vlan 10,20
+exit
+
+interface e3
+switchport mode access
+switchport access vlan 10
+exit
+
+interface e4
+switchport mode access
+switchport access vlan 20
+exit
+
+#STP:
+spanning-tree mode rapid-pvst
+interface range e3-4
+spanning-tree portfast
+spanning-tree bpduguard enable
+#spanning-tree bpdufilter enable
+exit
+
+#################################SW3:
+configure terminal
+hostame SW3
+
+#VLANS:
+vlan 30
+vlan 40
+
+#INTERFACES:
+interface range ethernet1-2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk allowed vlan 30,40
+exit
+
+interface e3
+switchport mode access
+switchport access vlan 30
+exit
+
+interface e4
+switchport mode access
+switchport access vlan 40
+exit
+
+#STP:
+spanning-tree mode rapid-pvst
+interface range e3-4
+spanning-tree portfast
+spanning-tree bpduguard enable
+#spanning-tree bpdufilter enable
+exit
+
+#################################SW4:
+configure terminal
+hostame SW4
+
+#VLANS:
+vlan 30
+vlan 40
+
+#INTERFACES:
+interface range ethernet1-2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk allowed vlan 30,40
+exit
+
+interface e3
+switchport mode access
+switchport access vlan 30
+exit
+
+interface e4
+switchport mode access
+switchport access vlan 40
+exit
+
+#STP:
+spanning-tree mode rapid-pvst
+interface range e3-4
+spanning-tree portfast
+spanning-tree bpduguard enable
+#spanning-tree bpdufilter enable
+exit

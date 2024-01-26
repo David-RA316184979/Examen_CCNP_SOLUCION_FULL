@@ -1,0 +1,426 @@
+Temas que pueden venir, Check:
+1.RUTAS FLOTANTES
+2.ACL
+    2.1. STANDARD(SOLO BLOQUEA IP'S DE ORIGEN Y VAN CERCANAS AL DESTINO)
+        //ip access-list [standard | <numero_del_1_al_99>] 
+        //[permit | deny] <ip_a_bloquear> <wildcard>
+        //permit any any
+        //interface <nombre_interfaz>
+        //ip access-group [<Nombre_de_la_lista> | <numero_del_100_al_199] [in | out]
+    2.2. EXTENDIDAS (SE CONFIGURAN MÁS CERCANAS AL ORIGEN Y PUEDEN BLOQUEAR IPorigen, IPdestino, PUERTOorigen y PUERTOdestino)
+        //ip access-list extended [<Nombre_de_la_lista> | <numero_del_100_al_199]
+        //[deny | permit] <protocolo> <ip_a_bloquear> <wildcard> [eq] [<puerto_origen>] <ip_a_destino> <wildcard> [eq] [<puerto_destino>]
+        //permit any any
+        //interface <nombre_interfaz>
+        //ip access-group [<Nombre_de_la_lista> | <numero_del_100_al_199] [in | out]
+    2.3. FILTER LIST (SE USA EN BGP PARA EL AS-PATH)
+        //ip as-path access-list <numero_de_secuencia_de_10_en_10> {^$ | ^<numero_de_AS>_}
+3.PORT-CHANNEL
+    3.1. ESTÁTICO
+        //interface range <interfaces>
+        //channel-group <id_de_grupo_de_portchannel> mode on
+        //interface port-channel <id_de_grupo_de_portchannel>
+        //switchport mode trunk
+        //switchport trunk allowed vlan <vlan 10,20,30,etc>
+    3.2. LACP
+        //interface range <interfaces>
+        //channel-group <id_de_grupo_de_portchannel> mode active
+        //interface port-channel <id_de_grupo_de_portchannel>
+        //switchport mode trunk
+        //switchport trunk allowed vlan <vlan 10,20,30,etc>
+    3.3. PAGP
+        //interface range <interfaces>
+        //channel-group <id_de_grupo_de_portchannel> mode desirable
+        //interface port-channel <id_de_grupo_de_portchannel>
+        //switchport mode trunk
+        //switchport trunk allowed vlan <vlan 10,20,30,etc>
+4.STP
+    4.1. RSTP
+        #ACTIVAR RAPID SPANNING-TREE
+            //spanning-tree mode rapid-pvst
+        #CAMBIAR PRIORIDAD DEL ROOT BRIDGE POR VLAN
+            //spanning-tree vlan 10 priority 8192
+        #CAMBIAR EL COSTO POR INTERFAZ
+            //interface <nombre_interfaz>
+            //spanning-tree vlan <id_vlan> cost <valor_entre_1_y_65535>
+        #CAMBIAR EL PORT PRIORITY POR INTERFAZ
+            //interface <nombre_interfaz>
+            //spanning-tree vlan <id_vlan> port-priority <valor_entre_0_y_255>
+        #CAMBIAR TIMERS
+            //spanning-tree vlan <id_vlan> {hello-time | forward-time | max-age} <numero_en_segundos>
+        #COLOCAR EL PORTFAST (SIEMPRE VAN EN ENLACES DE ACCESO)
+            //interface range <interfaces>
+            //spanning-tree portfast
+        #COLOCAR EL BPDU GUARD (SIEMPRE VAN EN ENLACES DE ACCESO)
+            //interface range <interfaces>
+            //spanning-tree bpduguard enable
+        #COLOCAR EL ROOT GUARD (SIEMPRE VA EN LOS PUERTOS DEL ROOT BRIDGE)
+            //interface range <interfaces>
+            //spanning-tree guard root
+    4.2. MSTP
+        #CREAR INSTANCIA DE MULTIPLE STP
+            //spanning-tree mst configuration
+            //name <nombre_de_la_region>
+            //revision <número_de_revision_igual_en_una_misma_region>
+            //instance <numero_de_instancia> vlan <10,20,30,etc>
+            //instance <numero_de_instancia> vlan <40,50,60,etc>
+            //exit
+            //spanning-tree mode mst
+        #CAMBIAR PRIORIDAD DE MSTP
+            //spanning-tree mst <numero_de_instancia> priority 4096
+        #CAMBIAR EL COSTO POR INTERFAZ
+            //interface <nombre_interfaz>
+            //spanning-tree mst <id_instancia> cost <valor_entre_1_y_65535>
+        #CAMBIAR EL PORT PRIORITY POR INTERFAZ
+            //interface <nombre_interfaz>
+            //spanning-tree mst <id_instancia> port-priority <valor_entre_0_y_255>
+5.FHRP
+    5.1. HSRP (HAY QUE CREAR LA SVI Y EL ROOT BRIDGE DEBE SER EL ACTIVE DE HSRP)
+        #CREACION DE SVI
+            //interface vlan <id_vlan>
+            //ip address <ip_real_diferente_a_GW> <mask>
+        #CONFIGURACION VIP DE PRIMER SWITCH DE CAPA 3
+            //interface vlan <id_vlan>
+            //standby <grupo_igual_al_id_vlan> ip <ip_virtual_por_lo_regular_la_GW>
+            //standby <grupo_igual_al_id_vlan> preempt
+            ##ESTO SOLO EN LOS ACTIVE
+            //standby <grupo_igual_al_id_vlan> priority <mayor_a_la_default>
+        #PARA IPV6
+            //interface vlan <id_vlan>
+            //standby <grupo_igual_al_id_vlan> version 2
+    5.2. VRRP
+        #CREACION DE SVI
+            //interface vlan <id_vlan>
+            //ip address <ip_real_diferente_a_GW> <mask>
+        #CONFIGURACION VIP DE PRIMER SWITCH DE CAPA 3
+            //interface vlan <id_vlan>
+            //vrrp <grupo_igual_al_id_vlan> ip <ip_virtual_por_lo_regular_la_GW>
+            //vrrp <grupo_igual_al_id_vlan> preempt
+            ##ESTO SOLO EN LOS ACTIVE
+            //vrrp <grupo_igual_al_id_vlan> priority <mayor_a_la_default>
+    5.3. GLBP
+        #CREACION DE SVI
+            //interface vlan <id_vlan>
+            //ip address <ip_real_diferente_a_GW> <mask>
+        #CONFIGURACION VIP DE PRIMER SWITCH DE CAPA 3
+            //interface vlan <id_vlan>
+            //glbp <grupo_igual_al_id_vlan> ip <ip_virtual_por_lo_regular_la_GW>
+            //glbp <grupo_igual_al_id_vlan> preempt
+            ##ESTO SOLO EN LOS ACTIVE
+            //glbp <grupo_igual_al_id_vlan> priority <mayor_a_la_default>
+6.EIGRP
+    6.1. IPV4
+        #CREACIÓN DE PROCESO
+            //router eigrp <numero_de_AS>
+            //network <x.x.x.x> <wildcard>
+            //no auto
+        #CONFIGURAR INTERFACES PASIVAS (SE COLOCA HACIA LOS SWITCHES DE CAPA 2 Y HACIA LOS DEMÁS ROUTERS FUERA DEL PROCESO)
+            //router eigrp <numero_de_AS>
+            //passive-interface <interfaz>
+        #CAMBIAR LOS TIMERS
+            //interface <interfaz>
+            //ip hello-interval eigrp <numero_de_AS> <tiene_que_ser_menor_al_hold>
+            //ip hold-time eigrp <numero_de_AS> <mayor_al_hello>
+        #CAMBIAR ANCHO DE BANDA POR INTERFAZ
+            //interface <interfaz>
+            //bandwidth <numero_en_kbps>
+        #CAMBIAR DELAY POR INTERFAZ
+            //interface <interfaz>
+            //delay <numero_en_decenas_de_microsegundos>
+        #CAMBIAR VARIANZA (ESTE VALOR ES ÚNICO EN CADA ROUTER)
+            //router eigrp <numero_de_AS>
+            //variance <numero_entero>
+        #CONFIGURAR STUB OPTIONS
+            //router eigrp <numero_de_AS>
+            //eigrp stub [receive-only | leak-map | static | redistributed]
+        #SUMARIZACIÓN DE EIRGP POR INTERFAZ
+            //interface <interfaz>
+            //ip summary-address eigrp <numero_de_AS> <direccion_IP_sumarizada> <mask>
+        #CAMBIAR DISTANCIA ADMINISTRATIVA DEL PROTOCOLO 
+            //router eigrp <numero_de_AS>
+            //distance eigrp <distancia_interna_entre_1_y_255> <distancia_externa_entre_1_y_255>
+    6.2. IPV6
+        #ACTIVAMOS IPV6
+            //ipv6 unicast-routing
+        #CREACIÓN DE PROCESO
+            //ipv6 router eigrp <numero_de_AS>
+            //eigrp router-id <direccion_ip>
+            //no shutdown
+        #HABILITAR POR INTERFACES (SE HABILITA EIGRP IPV6 POR INTERFACES POR LA LINK-LOCAL, TAMBIÉN INCLUYE LOOPBACKS)
+            //interface <interfaz>
+            //ipv6 eigrp <numero_de_AS>
+            //ipv6 enable
+    6.3. NAMED
+        #CONFIGURACION A SECAS
+            //router eigrp <nombre_colocado_al_proceso_nombrado>
+            //address-family ipv4 unicast autonomous-system <numero_de_AS>
+            //topology base
+            //exit-af-topology
+            //network 0.0.0.0
+            //exit-adress-family
+            //address-family ipv6 unicast autonomous-system <numero_de_AS>
+            //topology base
+            //exit-af-topology
+        #SUMARIZACION EN NAMED POR INTERFAZ
+            //router eigrp <nombre_colocado_al_proceso_nombrado>
+            //address-family ipv4 unicast autonomous-system <numero_de_AS>
+            //af-interface <interfaz>
+            //summary-address 192.168.2.0/23
+    6.4 REDISTRIBUCION
+        #METER RUTAS DE OSPF A EIGRP (EN AUTOMÁTICO ES E1, PARA E2, ESPECIFICAR 2)
+            //router eigrp <numero_de_AS>
+            //redistribute ospf <numero_de_proceso_ospf> metric <por_lo_regular_1500> 100 255 1 1500
+7.OSPF
+    7.1. IPV4
+        #CREACIÓN DE PROCESO
+            //router ospf <numero_de_proceso_ospf>
+            //router-id <x.x.x.x>
+            //network <x.x.x.x> <wildcard> area <Numero_de_area>
+        #CAMBIAR LA PRIORIDAD POR PUERTO DE DR Y BDR 
+            //interface <interfaz>
+            //ip ospf priority <numero_de_0_a_255>
+        #CAMBIAR LOS TIMERS
+            //interface <interfaz>
+            //ip ospf hello-interval <segundos_menor_a_dead_interval>
+            //ip ospf dead-interval <segundos_mayor_a_hello>
+        #CONFIGURAR INTERFACES PASIVAS (SE COLOCA HACIA LOS SWITCHES DE CAPA 2 Y HACIA LOS DEMÁS ROUTERS FUERA DEL PROCESO)
+            //router ospf <numero_de_proceso_ospf>
+            //passive-interface <interfaz>
+        #CONFIGURAR COSTO POR INTERFAZ
+            //interface <interfaz>
+            //ip ospf cost <numero_entero>
+        #CAMBIAR EL ANCHO DE BANDA DE REFERENCIA
+            //router ospf <numero_de_proceso_ospf>
+            //auto-cost reference-bandwidth <numero_grande>
+        #CAMBIAR ANCHO DE BANDA POR INTERFAZ
+            //interface <interfaz>
+            //bandwidth <numero_en_kbps>
+        #CAMBIAR COSTO POR INTERFAZ
+            //interface <interfaz>
+            //ip ospf cost <numero_entero>
+        #CONFIGURAR AREA STUB (POR AREAS SE CONFIGURA)
+            //router ospf <numero_de_proceso_ospf>
+            //area <id_de_area> stub
+        #CONFIGURAR AREA T STUBBY (POR AREAS SE CONFIGURA)
+            //router ospf <numero_de_proceso_ospf>
+            //area <id_de_area> stub no-summary
+        #CONFIGURAR AREA NSSA (POR AREAS SE CONFIGURA)
+            //router ospf <numero_de_proceso_ospf>
+            //area <id_de_area> nssa
+        #SUMARIZACIÓN EN EL ABR 
+            //router ospf <numero_de_proceso_ospf>
+            //area <id_de_area> range <direccion_IP_sumarizada> <mask>
+        #SUMARIZACIÓN EN EL ASBR 
+            //router ospf <numero_de_proceso_ospf>
+            //summary-address {{ip-address mask} | {prefix mask}} [not-advertise] [tag <nombre_tag>]
+        #CONFIGURAR VIRTUAL LINK
+            //router ospf <numero_de_proceso_ospf>
+            //area <id_de_area> virtual-link <id_del_router_vecino>
+    7.2. IPV6
+        #ACTIVAMOS IPV6
+            //ipv6 unicast-routing
+        #CREAR PROCESO
+            //ipv6 router ospf <numero_de_proceso_ospf> | //router ospfv3
+            //router-id <x.x.x.x_en_ipv4>
+        #ACTIVAR PROCESO OSPFV3 POR INTERFAZ
+            //interface <interfaz>
+            //ipv6 ospf <numero_de_proceso_ospf> area <id_de_area>
+        #CONFIGURAR INTERFACES PASIVAS (SE COLOCA HACIA LOS SWITCHES DE CAPA 2 Y HACIA LOS DEMÁS ROUTERS FUERA DEL PROCESO)
+            //ipv6 router ospf <numero_de_proceso_ospf>
+            //passive-interface <interfaz>
+    7.3. REDISTRIBUCION
+        #METER RUTAS DE EIGRP A OSPF (EN AUTOMÁTICO ES E1, PARA E2, ESPECIFICAR 2)
+            //router ospf <numero_de_proceso_ospf>
+            //redistribute eigrp <numero_de_AS> metric <0_a_255> metric-type [1 | 2] subnets
+8.DISTRIBUTE LIST EN MODO IN (SE USAN ACL'S)
+    #CREACIÓN DE LA ACL
+        //ip access-list standard <nombre_de_la_acl>
+        //[permit | deny] <ip_a_bloquear> <wildcard>
+        //exit
+    #COMANDO PARA FILTRAR DENTRO DE LA REDISTRIBUCIÓN HACIA OSPF (VA EN LA INTERFAZ POR LA CUAL ENTRA LA REDISTRIBUCIÓN A OSPF)
+        //router ospf <numero_de_proceso_ospf>
+        //redistribute eigrp <numero_de_AS> metric <0_a_255> metric-type [1 | 2] subnets
+        //distribute-list <nombre_de_la_acl> in <interfaz>
+9.PREFIX LIST
+    #CREACIÓN DE LA PREFIX LIST
+        //ip prefix-list <nombre_de_la_prefix_list> seq <numero_de_secuencia_va_de_5_en_5> {deny | permit} <network>/<lenght> [ge <ge_value>] [le <le_value>]
+    #ACTIVAR LA PREFIX LIST (TE METES DENTRO DEL PROCESO, YA SEA OSPF O EIGRP AL CUAL LE ENTRAN LAS REDES REDISTRIBUIDAS)
+        //router ospf <numero_de_proceso_ospf>
+        //redistribute eigrp <numero_de_AS> metric <0_a_255> metric-type [1 | 2] subnets
+        //distribute list prefix <nombre_de_la_prefix_list> [in | out] eigrp <numero_de_AS>
+10.ROUTE-MAP
+    #DEFINIR EL ROUTE-MAP
+        //route-map <nombre_del_route_map> [permit | deny] <numero_de_secuencia_de_10_en_10>
+        
+        //match ip address {<nombre_de_la_acl> | <nombre_de_la_prefix_list>}
+        //match tag <numero_de_etiqueta>
+        //match community {<numero_de_lista> | <nombre_de_lista>}
+        //match as-path <numero_de_filter-list>
+        //!
+        //set metric <valor_de_metrica>
+        //set tag <numero_de_etiqueta>
+        //set metric-type {type-1 | type-2}
+        //set ip next-hop <ip_de_siguiente_salto>
+    #REDISTRIBUIR CON ROUTE-MAP CON PREFIX LIST
+        //ip prefix-list <nombre_de_la_prefix_list> seq <numero_de_secuencia_va_de_5_en_5> {deny | permit} <network>/<lenght> [ge <ge_value>] [le <le_value>]
+        //router ospf <numero_de_proceso_ospf>
+        //redistribute eigrp <numero_de_AS> subnets route-map <nombre_del_route_map>
+11.PBR
+    #CON ACL EXTENDIDAS (ALTERAR EL TRÁFICO PROVENIENTE DE UNA PC)
+        //ip access-list extended <nombre_de_la_acl>
+        //[deny | permit] <protocolo> <ip_a_bloquear> <wildcard> [eq] [<puerto_origen>] <ip_a_destino> <wildcard> [eq] [<puerto_destino>]
+        //exit
+        //route-map <nombre_del_route_map> permit <secuencia>
+        //match ip address <nombre_de_la_acl>
+        //set ip next-hop <ip_de_siguiente_salto>
+        //exit
+    #ACTIVAR PBR POR INTERFAZ
+        //ip policy route-map <nombre_del_route_map>
+    11.1 IPSLA PARA NEXT HOP
+        #DEFINIR LA PRUEBA
+            //ip sla <numero_de_ipsla>
+            //icmp-echo <ip_interfaz_a_monitorear> source-interface <interfaz_mas_cercana_a_la_pc_que_envia_ping>
+            //frecuency 10
+            //exit 
+        #ASOCIAR LA PRUEBA Y CUANDO SE APLICA
+            //ip sla schedule <numero_de_ipsla> start-time now life forever
+        #A QUE OBJETO VOY A AFECTAR
+            //track <id_de_track> rtr <numero_de_ipsla> reachability
+            //delay down 10 up 1
+            //exit
+        #DEFINIMOS ROUTE-MAP
+            //route-map <nombre_de_la _pbr> permit <secuencia>
+            //match ip address <nombre_de_la_acl_aplicada_en_la_pbr>
+            //set ip next-hop verify-availability <ip_del_proximo_salto> 1 track <id_de_track>
+    11.2 IPSLA PARA HSRP
+        #DEFINIMOS LA IP SLA 
+            //ip sla <numero_de_ipsla>
+            //icmp-echo <ip_interfaz_a_monitorear>
+            //frecuency 10
+            //ip sla schedule <numero_de_ipsla> life forever start-time now
+        #CREAR EL OBJETO
+            //track <id_de_track> ip sla <numero_de_ipsla>
+        #CONFIGURAR HSRP PARA DECREMENTAR PRIORIDAD CON EL OBJETO
+            //interface <interfaz>
+            //standby <numero_de_vlan> track <id_de_track> decrement <numero_a_decrementar_en_prioridad>
+12.BGP
+    12.1. IBGP (EL NEXT-HOP-SELF SOLO VA EN ABR'S)
+        //router bgp <mismo_numero_de_AS>
+        //neighbor <ip_loopback_vecino> remote-as 65000
+        //neighbor <ip_loopback_vecino> update-source loopback <id_loopback_propia_para_peers>
+        //neighbor <ip_loopback_vecino> next-hop-self
+        //neighbor <ip_loopback_vecino> timers 10 30
+        //network <direccion_ip> mask <mascara>
+    12.2. EBGP
+        //router bgp <diferente_numero_de_AS>
+        //neighbor <ip_loopback_vecino> remote-as <diferente_numero_de_AS>
+        //neighbor <ip_loopback_vecino> update-source loopback <id_loopback_propia_para_peers>
+        //neighbor <ip_loopback_vecino> ebgp-multihop
+        //neighbor <ip_loopback_vecino> timers 10 30
+        //network <direccion_ip> mask <mascara>
+    12.3. ATRIBUTOS
+        #WEIGHT (MAYOR-MEJOR, LOCAL)
+            //route-map <nombre_del_route_map> [permit | deny] <numero_de_secuencia_de_10_en_10>
+            //match ip address {<nombre_de_la_acl> | <nombre_de_la_prefix_list>}
+            //set weight 100
+        #LOCAL_PREFERENCE (MAYOR-MEJOR, LOCAL)
+            //set local-preference 100
+        #AS-PATH (MENOR-MEJOR, COMPARTIDO)
+            //set as-path prepend <SA_a_agregar>
+        #METRICA (MENOR-MEJOR, COMPARTIDA CON EBGP)
+            //set metric 100  
+        #APLICAR RM A VECINO 
+            //router bgp <numero_de_AS>
+            //neighbor <ip_loopback_vecino> route-map <nombre_del_RM> [in | out]
+    12.5. MP-BGP
+        #ACTIVAMOS IPV6
+            //ipv6 unicast-routing
+        #ROUTE-MAP DE NEXT-HOP (NECESARIO PARA CARRIER IPV4 CON PASSENGER IPV6)
+            //route-map <nombre_del_route_map>
+            //set ipv6 next-hop <ip_de_siguiente_salto_en_ipv6>
+        #CARRIER IPV4 CON PASSENGER IPV6 (INFRAESTRUCTURA IPV4, PASANDO PREFIJOS IPV6)
+            //router bgp <diferente_numero_de_AS>
+            //neighbor <ip_loopback_vecino_en_ipv4> remote-as <diferente_numero_de_AS>
+            //!
+            //address-family ipv4 unicast
+            //network <ipv4_anunciada> mask <mascara>
+            //!
+            //address-family ipv6 unicast
+            //neighbor <ip_loopback_vecino_en_ipv4> activate
+            //network <prefijo_ipv6/mascara>
+            //neighbor <ip_loopback_vecino_en_ipv4> route-map <nombre_del_route_map> out
+        
+        #CARRIER IPV6 CON PASSENGER IPV6
+            //router bgp <diferente_numero_de_AS>
+            //neighbor <ip_loopback_vecino_en_ipv6> remote-as <diferente_numero_de_AS>
+            //!
+            //address-family ipv6 unicast
+            //neighbor <ip_loopback_vecino_en_ipv6> activate
+            //network <prefijo_ipv6/mascara>
+    12.6. ROUTE REFLECTORS (SOLO EN R PADRE DE LA JERARQUIA DE IBGP)
+        //neighbor <ip_loopback_vecino> route-reflector-client
+    12.7. BGP PEER GROUPS
+        #CREACIÓN DEL ROUTE-MAP
+            //route-map <nombre_del_route_map> [permit | deny] <numero_de_secuencia_de_10_en_10>
+            //match as-path <numero_de_filter_list>
+        #ACTIVACIÓN DEL PEER-GROUP
+            //router bgp <mismo_numero_de_AS>
+            //neighbor <Nombre_de_Peer_group> peer-group
+            //neighbor <Nombre_de_Peer_group> filter-list <numero_de_filter_list> out
+            //neighbor <Nombre_de_Peer_group> prefix-list <nombre_de_la_prefix_list> in
+            //neighbor <Nombre_de_Peer_group> route-map <nombre_del_route_map> in
+            //neighbor <ip_vecino> remote-as <numero_de_AS>
+            //neighbor <ip_vecino> peer-group <Nombre_de_Peer_group>
+    12.8. COMMUNITIES
+        #CREACION DE ACL
+            //ip access-list <numero_de_acl> permit 0.0.0.0 255.255.255.255
+        #CREACION DE COMMUNITIY LIST
+            //ip community-list <numero_de_community_list_de_1_a_99> {permit | deny} {1-... | internet | no-export | no-advertise}
+        #DETECCION DE COMMUNITIES POR ACL
+            //route-map <nombre_del_route_map> [permit | deny] <numero_de_secuencia_de_10_en_10>
+            //match ip address <numero_de_acl>
+            //set community <numero_de_comunidad> additive
+        #DETECCION DE COMMUNITIES POR COMMUNITY-LIST
+            //route-map <nombre_del_route_map> [permit | deny] <numero_de_secuencia_de_10_en_10>
+            //match community {<numero_de_community_list_de_1_a_99> | internet | no-export | no-advertise} 
+            //set weight <valor_de_peso>
+            //set community <numero_de_comunidad> additive
+        #APLICACIÓN DE COMUNIDAD
+            //router bgp <propio_numero_de_AS>
+            //neighbor <ip_loopback_vecino> remote-as <diferente_numero_de_AS>
+            //neighbor <ip_loopback_vecino> send-community
+            //neighbor <ip_loopback_vecino> route-map <nombre_del_route_map> [in | out]
+    12.9. REDISTRIBUCION  
+     
+13.VRF
+    13.1. NORMAL
+        #CREAMOS LAS VRF
+            //ip vrf <nombre_vrf>
+            //exit
+        #ASIGNAMOS VRF POR INTERFAZ
+            //interface <interfaz>
+            //ip vrf forwarding <nombre_vrf>
+            //ip address <direccion_ip> <mascara>
+            //no shutdown
+            //exit
+    13.2. EASY VIRTUAL NETWORKS
+        #CREAMOS LAS VRF
+            //ip vrf <nombre_vrf>
+            //exit
+        #ASIGNAMOS VRF POR INTERFAZ
+            //interface <interfaz>
+            //no shutdown
+            //interface <interfaz>.<numero_etiqueta_subinterfaz>
+            //ip vrf forwarding <nombre_vrf>
+            //encapsultaion dot1q <numero_etiqueta_subinterfaz>
+            //ip address <direccion_ip> <mascara>
+            //no shutdown
+            //exit
+14.GRE
+    //interface tunnel<numero_de_tunnel>
+    //bandwidth <limite_de_bancha_ancha_en_kbps>
+    //ip address <direccion_ip_propia_del_extremo_del_tunnel> <mascara>
+    //ip mtu 1400
+    //keepalive 5 3
+    //tunnel source <interfaz_de_tu_IP_publica>
+    //tunnel destination <direccion_ip_publica_del_vecino>
